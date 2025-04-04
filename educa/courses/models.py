@@ -146,11 +146,11 @@ class Video(ItemBase):
 
 class CompletedContent(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.ForeignKey('Content', on_delete=models.CASCADE)  # Assuming Module = Lesson
+    content = models.ForeignKey('Content', on_delete=models.CASCADE)
     completed_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'content')      # Prevents duplicate completions
+        unique_together = ('user', 'content')
 
     def __str__(self):
         return f"{self.user.username} completed {self.content.item.title}"
