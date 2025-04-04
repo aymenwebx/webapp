@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if subject %}{{ subject.title }} courses{% else %}All courses{% endif %} | KnowledgeCurve
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <!-- Subjects Sidebar -->
+    <div class="col-lg-3 mb-4 mb-lg-0">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 class="h5 mb-3">Subjects</h3>
+          <ul class="nav flex-column">
+            <li class="nav-item mb-2 {% if not subject %}active{% endif %}">
+              <a class="nav-link {% if not subject %}fw-bold text-primary{% else %}text-dark{% endif %}"
+                 href="{% url 'course_list' %}">
+                All Subjects
+              </a>
+            </li>
+            {% for s in subjects %}
+            <li class="nav-item mb-2 {% if subject == s %}active{% endif %}">
+              <a class="nav-link {% if subject == s %}fw-bold text-primary{% else %}text-dark{% endif %}"
+                 href="{% url 'course_list_subject' s.slug %}">
+                {{ s.title }}
+                <span class="badge bg-secondary ms-1">{{ s.total_courses }}</span>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Courses List -->
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+          {% if subject %}{{ subject.title }} courses{% else %}All courses{% endif %}
+        </h1>
+      </div>
+
+      <div class="row g-4">
+        {% for course in courses %}
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h3 class="h5 mb-0">
+                  <a href="{% url 'course_detail' course.slug %}" class="text-decoration-none">
+                    {{ course.title }}
+                  </a>
+                </h3>
+                <span class="badge bg-primary">{{ course.subject }}</span>
+              </div>
+              <div class="text-muted mb-2">
+                <small>
+                  <i class="bi bi-collection"></i> {{ course.total_modules }} modules
+                  <i class="bi bi-person ms-2"></i> {{ course.owner.get_full_name }}
+                </small>
+              </div>
+              <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-outline-primary mt-2">
+                View Details
+              </a>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+          <div class="alert alert-info">
+            No courses available yet.
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

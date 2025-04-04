@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}{{ object.title }} | KnowledgeCurve{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      {% with subject=object.subject %}
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h1 class="h2 mb-4 fw-bold">{{ object.title }}</h1>
+
+          <div class="mb-4">
+            <h2 class="h4 mb-3">Overview</h2>
+            <div class="d-flex align-items-center mb-3">
+              <span class="badge bg-primary me-2">
+                <a href="{% url 'course_list_subject' subject.slug %}" class="text-white text-decoration-none">
+                  {{ subject.title }}
+                </a>
+              </span>
+              <span class="text-muted me-3">
+                <i class="bi bi-collection"></i> {{ object.modules.count }} modules
+              </span>
+              <span class="text-muted">
+                <i class="bi bi-person"></i> {{ object.owner.get_full_name }}
+              </span>
+            </div>
+
+            <div class="course-overview mb-4">
+              {{ object.overview|linebreaks }}
+            </div>
+
+            {% if user.is_authenticated %}
+  {% if is_enrolled %}
+    <div class="alert alert-success mt-3">
+      You are enrolled in this course
+    </div>
+    <a href="{% url 'student_course_detail' object.id %}"
+       class="btn btn-primary">
+      Continue Learning
+    </a>
+  {% else %}
+    <form action="{% url 'student_enroll_course' %}" method="post">
+      {{ enroll_form }}
+      {% csrf_token %}
+      <input type="submit" class="btn btn-primary" value="Enroll now">
+    </form>
+  {% endif %}
+{% else %}
+  <a href="{% url 'login' %}?next={{ request.path }}"
+     class="btn btn-primary">
+    Login to enroll
+  </a>
+{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endwith %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .course-overview {
+    line-height: 1.8;
+    font-size: 1.1rem;
+  }
+
+  .enroll-form .form-control {
+    margin-bottom: 1rem;
+  }
+</style>
+{% endblock %}

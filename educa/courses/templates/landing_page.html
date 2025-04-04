@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+  <!-- Hero Section -->
+  <div class="container py-5">
+    <div class="hero-section row align-items-center p-4 p-lg-5">
+      <div class="col-lg-6 hero-text mb-4 mb-lg-0">
+        <h1 class="display-4 fw-bold mb-3">Bienvenue sur KnowledgeCurve</h1>
+        <p class="lead mb-4">Un site interactif pour apprendre le français de manière ludique et efficace !</p>
+        <div class="search-bar input-group mb-3">
+          <input type="text" class="form-control form-control-lg" placeholder="Rechercher un cours...">
+          <button class="btn btn-lg" type="button">Rechercher</button>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <a href="#features" class="btn btn-light btn-lg px-4">Learn More</a>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-image-container">
+          <img src="{% static 'knowledgecurve.png' %}" alt="knowledgecurve"
+               class="hero-image"
+               loading="lazy">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <section id="features" class="py-5 bg-white">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold">Why Choose KnowledgeCurve?</h2>
+        <p class="lead text-muted">The most effective way to learn French online</p>
+      </div>
+      <div class="row g-4">
+        <!-- Features content -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="py-5 bg-light">
+    <div class="container">
+      <!-- Testimonials content -->
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+      <h2 class="display-5 fw-bold mb-4">Ready to start your French journey?</h2>
+      <p class="lead mb-4">Join us now!</p>
+    </div>
+  </section>
+
+  <!-- Move hero-section specific CSS here -->
+  <style>
+    .hero-section {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #2a52be 100%);
+      color: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(65, 105, 225, 0.2);
+      margin: 2rem auto;
+      position: relative;
+    }
+    .hero-image-container {
+    position: relative;
+    width: 400px; /* Fixed width for perfect circle */
+    height: 400px; /* Must match width */
+    border-radius: 50%; /* Makes container circular */
+    overflow: hidden;
+    background: linear-gradient(
+      to bottom right,
+      var(--primary-color) 0%,
+      rgba(42, 82, 190, 0.7) 100%
+    );
+    padding: 4px;
+    box-shadow: 0 4px 20px rgba(42, 82, 190, 0.3);
+    margin: 0 auto; /* Centers the circle */
+  }
+
+  .hero-image {
+    width: 200%;
+    height: 150%;
+    object-fit: cover; /* Ensures image fills circle */
+    border-radius: 80%; /* Circular image */
+    display: block;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    box-sizing: border-box;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-blend-mode: multiply;
+  }
+
+  .hero-image-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%
+    );
+    border-radius: 50%; /* Match container shape */
+    pointer-events: none;
+  }
+
+  .hero-image:hover {
+    transform: scale(1.03); /* Slightly stronger effect for circle */
+    }
+  </style>
+{% endblock %}

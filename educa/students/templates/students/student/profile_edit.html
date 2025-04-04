@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile | KnowledgeCurve{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h1 class="h3 mb-4">
+            <i class="bi bi-person-gear"></i> Edit Profile
+          </h1>
+          
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">First Name</label>
+                <input type="text" class="form-control" name="first_name" value="{{ form.first_name.value|default:user.first_name }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Last Name</label>
+                <input type="text" class="form-control" name="last_name" value="{{ form.last_name.value|default:user.last_name }}">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Bio</label>
+                <textarea class="form-control" name="bio" rows="3">{{ form.bio.value|default:user.profile.bio }}</textarea>
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+              <a href="{% url 'profile' %}" class="btn btn-outline-secondary me-md-2">
+                Cancel
+              </a>
+              <button type="submit" class="btn btn-primary">
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load course %}
+
+{% block title %}
+  {{ module.title }} | {{ module.course.title }} | KnowledgeCurve
+{% endblock %}
+
+{% block content %}
+{% with course=module.course %}
+<div class="container py-4">
+  <div class="row">
+    <!-- Modules Sidebar -->
+    <div class="col-lg-3 mb-4 mb-lg-0">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 class="h5 mb-3">
+            <a href="{% url 'course_detail' course.slug %}" class="text-decoration-none">
+              {{ course.title }}
+            </a>
+          </h3>
+
+          <ul class="nav flex-column module-list">
+            {% for m in course.modules.all %}
+            <li class="nav-item mb-2 {% if m == module %}active{% endif %}" data-id="{{ m.id }}">
+              <a class="nav-link {% if m == module %}fw-bold text-primary{% else %}text-dark{% endif %}"
+                 href="{% url 'module_content_list' m.id %}">
+                <span class="badge bg-secondary me-1">{{ m.order|add:1 }}</span>
+                {{ m.title }}
+              </a>
+            </li>
+            {% empty %}
+            <li class="nav-item text-muted">No modules yet</li>
+            {% endfor %}
+          </ul>
+
+          <div class="mt-3">
+            <a href="{% url 'course_module_update' course.id %}" class="btn btn-sm btn-outline-primary w-100">
+              <i class="bi bi-pencil"></i> Edit Modules
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Module Content -->
+    <div class="col-lg-9">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h4 mb-3">
+            Module {{ module.order|add:1 }}: {{ module.title }}
+          </h2>
+
+          <div class="mb-4">
+            <h3 class="h5 mb-3">Module Contents</h3>
+
+            <div id="module-contents" class="list-group mb-4">
+              {% for content in module.contents.all %}
+              <div class="list-group-item" data-id="{{ content.id }}">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    {% with item=content.item %}
+                    <span class="badge bg-info me-2">{{ item|model_name|title }}</span>
+                    {{ item }}
+                    {% endwith %}
+                  </div>
+                  <div class="btn-group">
+                    <a href="{% url 'module_content_update' module.id content.item|model_name content.item.id %}"
+                       class="btn btn-sm btn-outline-secondary">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <form action="{% url 'module_content_delete' content.id %}" method="post" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              {% empty %}
+              <div class="alert alert-info">
+                This module has no contents yet.
+              </div>
+              {% endfor %}
+            </div>
+
+            <h3 class="h5 mb-3">Add New Content</h3>
+            <div class="d-grid gap-2 d-md-block">
+              <a href="{% url 'module_content_create' module.id 'text' %}" class="btn btn-outline-primary me-2 mb-2">
+                <i class="bi bi-text-paragraph"></i> Text
+              </a>
+              <a href="{% url 'module_content_create' module.id 'image' %}" class="btn btn-outline-primary me-2 mb-2">
+                <i class="bi bi-image"></i> Image
+              </a>
+              <a href="{% url 'module_content_create' module.id 'video' %}" class="btn btn-outline-primary me-2 mb-2">
+                <i class="bi bi-film"></i> Video
+              </a>
+              <a href="{% url 'module_content_create' module.id 'file' %}" class="btn btn-outline-primary mb-2">
+                <i class="bi bi-file-earmark"></i> File
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endwith %}
+{% endblock %}
+
+{% block include_js %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5sortable/0.13.3/html5sortable.min.js"></script>
+{% endblock %}
+
+{% block domready %}
+  var options = {
+      method: 'POST',
+      mode: 'same-origin',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/json'
+      }
+  }
+
+  // Module sorting
+  const moduleOrderUrl = '{% url "module_order" %}';
+  sortable('.module-list', {
+    items: 'li',
+    forcePlaceholderSize: true,
+    placeholderClass: 'placeholder'
+  })[0].addEventListener('sortupdate', function(e) {
+    let modulesOrder = {};
+    document.querySelectorAll('.module-list li').forEach(function(module, index) {
+      modulesOrder[module.dataset.id] = index;
+      module.querySelector('.badge').textContent = index + 1;
+    });
+    options.body = JSON.stringify(modulesOrder);
+    fetch(moduleOrderUrl, options);
+  });
+
+  // Content sorting
+  const contentOrderUrl = '{% url "content_order" %}';
+  sortable('#module-contents', {
+    items: 'div',
+    forcePlaceholderSize: true,
+    placeholderClass: 'placeholder'
+  })[0].addEventListener('sortupdate', function(e) {
+    let contentOrder = {};
+    document.querySelectorAll('#module-contents div').forEach(function(content, index) {
+      contentOrder[content.dataset.id] = index;
+    });
+    options.body = JSON.stringify(contentOrder);
+    fetch(contentOrderUrl, options);
+  });
+{% endblock %}

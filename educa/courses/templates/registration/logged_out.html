@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Logged out{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body p-4 text-center">
+          <h1 class="card-title h3 mb-4">Logged out</h1>
+
+          <div class="alert alert-success" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            You have been successfully logged out.
+          </div>
+
+          <p class="mt-4">
+            <a href="{% url 'login' %}" class="btn btn-primary">
+              <i class="bi bi-box-arrow-in-right me-2"></i>
+              Log in again
+            </a>
+          </p>
+
+          <p class="text-muted small mt-4">
+            Or <a href="{% url 'home' %}" class="text-decoration-none">return to homepage</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

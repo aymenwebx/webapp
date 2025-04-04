@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Log in | KnowledgeCurve{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4 p-md-5">
+          <div class="text-center mb-4">
+            <h1 class="h3 mb-3 fw-bold">Welcome back</h1>
+            <p class="text-muted">Log in to continue your French learning journey</p>
+          </div>
+
+          {% if form.errors %}
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            Invalid username or password
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endif %}
+
+          <form action="{% url 'login' %}" method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}" />
+
+            <div class="mb-3">
+              <label for="id_username" class="form-label">Username or Email</label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-person-fill"></i>
+                </span>
+                {{ form.username }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="id_password" class="form-label">Password</label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-lock-fill"></i>
+                </span>
+                {{ form.password }}
+                <button class="btn btn-outline-secondary toggle-password" type="button">
+                  <i class="bi bi-eye-fill"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="rememberMe">
+                <label class="form-check-label" for="rememberMe">Remember me</label>
+              </div>
+              <a href="{% url 'password_reset' %}" class="text-decoration-none small">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 mb-3 fw-bold">
+              Log in
+            </button>
+          </form>
+
+          <div class="position-relative text-center my-4">
+            <hr>
+            <span class="position-absolute top-50 translate-middle-y bg-white px-3 text-muted">or</span>
+          </div>
+
+          <div class="text-center">
+            <p class="mb-0">New to KnowledgeCurve?</p>
+            <a href="{% url 'register' %}" class="btn btn-outline-primary w-100 py-2 mt-2">
+              Create an account
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <p class="text-muted small">By continuing, you agree to our
+          <a href="#" class="text-decoration-none">Terms</a> and
+          <a href="#" class="text-decoration-none">Privacy Policy</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .toggle-password:hover {
+    background-color: var(--bs-light);
+  }
+  .card {
+    border-radius: 12px;
+  }
+</style>
+
+<script>
+  document.querySelector('.toggle-password').addEventListener('click', function() {
+    const password = document.querySelector('#id_password');
+    const icon = this.querySelector('i');
+    if (password.type === 'password') {
+      password.type = 'text';
+      icon.classList.replace('bi-eye-fill', 'bi-eye-slash-fill');
+    } else {
+      password.type = 'password';
+      icon.classList.replace('bi-eye-slash-fill', 'bi-eye-fill');
+    }
+  });
+</script>
+{% endblock %}

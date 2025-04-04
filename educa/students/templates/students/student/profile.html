@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <!-- Profile Sidebar -->
+    <div class="col-lg-4 mb-4 mb-lg-0">
+      {% include "students/student/profile_card.html" %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h4 mb-3">My Enrolled Courses</h2>
+
+          {% if enrolled_courses %}
+            <div class="list-group">
+              {% for course in enrolled_courses %}
+                <a href="{{ course.get_absolute_url }}" class="list-group-item list-group-item-action">
+                  <h3 class="h5 mb-0">{{ course.title }}</h3>
+                  <small class="text-muted">
+                    {{ course.subject }} • {{ course.modules.count }} modules
+                  </small>
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info">
+              You haven't enrolled in any courses yet.
+              <a href="{% url 'course_list' %}" class="alert-link">Browse courses</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
