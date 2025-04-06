@@ -57,7 +57,7 @@
               <div class="text-muted mb-2">
                 <small>
                   <i class="bi bi-collection"></i> {{ course.total_modules }} modules
-                  <i class="bi bi-person ms-2"></i> {{ course.owner.get_full_name }}
+                  <i class="bi bi-person ms-2"></i> {{ course.owner.get_first_name }}{{ course.owner.get_last_name }}
                 </small>
               </div>
               <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-outline-primary mt-2">
