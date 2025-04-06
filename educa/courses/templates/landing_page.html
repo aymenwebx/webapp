@@ -3,28 +3,35 @@
 {% block content %}
   <!-- Hero Section -->
   <div class="container py-5">
-    <div class="hero-section row align-items-center p-4 p-lg-5">
-      <div class="col-lg-6 hero-text mb-4 mb-lg-0">
-        <h1 class="display-4 fw-bold mb-3">Bienvenue sur KnowledgeCurve</h1>
-        <p class="lead mb-4">Un site interactif pour apprendre le français de manière ludique et efficace !</p>
-        <div class="search-bar input-group mb-3">
-          <input type="text" class="form-control form-control-lg" placeholder="Rechercher un cours...">
-          <button class="btn btn-lg" type="button">Rechercher</button>
-        </div>
-        <div class="d-flex flex-wrap gap-2 mt-4">
-          <a href="#features" class="btn btn-light btn-lg px-4">Learn More</a>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="hero-image-container">
-          <img src="{% static 'knowledgecurve.png' %}" alt="knowledgecurve"
-               class="hero-image"
-               loading="lazy">
-        </div>
-      </div>
+  <div class="hero-section row align-items-center p-4 p-lg-5">
+    <div class="col-lg-6 hero-text mb-4 mb-lg-0">
+      <h1 class="display-4 fw-bold mb-3">Bienvenue sur KnowledgeCurve</h1>
+      <p class="lead mb-4">Un site interactif pour apprendre le français de manière ludique et efficace !</p>
 
+      <!-- Updated search form with proper functionality -->
+      <form class="search-bar input-group mb-3" action="{% url 'course_search' %}" method="get" role="search">
+        <input type="text"
+               class="form-control form-control-lg"
+               name="q"
+               placeholder="Rechercher un cours..."
+               aria-label="Rechercher un cours"
+               value="{{ request.GET.q }}">
+        <button class="btn btn-outline-info" type="submit">
+          <i class="bi bi-search"></i> Rechercher
+        </button>
+      </form>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="hero-image-container">
+        <img src="{% static 'knowledgecurve.png' %}"
+             alt="KnowledgeCurve"
+             class="hero-image"
+             loading="lazy">
+      </div>
     </div>
   </div>
+</div>
 
   <!-- Features Section -->
   <section id="features" class="py-5 bg-white">

@@ -1,5 +1,6 @@
+from django.urls import reverse
+from django.utils.text import slugify
 from django.db import models
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.template.loader import render_to_string
@@ -41,6 +42,19 @@ class Course(models.Model):
         blank=True
     )
 
+    def save(self, *args, **kwargs):
+        if not self.slug:  # Auto-generate only if empty
+            self.slug = slugify(self.title)
+            # Ensure uniqueness
+            original_slug = self.slug
+            counter = 1
+            while Course.objects.filter(slug=self.slug).exists():
+                self.slug = f"{original_slug}-{counter}"
+                counter += 1
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('course_detail', args=[self.slug])
     class Meta:
         ordering = ['-published_date']
 

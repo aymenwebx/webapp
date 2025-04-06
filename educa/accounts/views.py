@@ -5,7 +5,7 @@ from .forms import UserRegistrationForm
 
 class UserRegistrationView(CreateView):
     form_class = UserRegistrationForm
-    template_name = 'account/register.html'
+    template_name = 'students/registration.html'
     success_url = reverse_lazy('course_list')
 
     def form_valid(self, form):

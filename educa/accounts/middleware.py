@@ -15,9 +15,9 @@ class UserTypeRedirectMiddleware:
 
             if request.user.user_type == 'student':
                 return redirect('student_course_list')
-            elif request.user.user_type == 'teacher':
+            """elif request.user.user_type == 'teacher':
                 return redirect('teacher_dashboard')
             elif request.user.user_type == 'parent':
-                return redirect('parent_dashboard')
+                return redirect('parent_dashboard')"""
 
         return response

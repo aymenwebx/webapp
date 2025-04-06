@@ -51,6 +51,7 @@ class ManageCourseListView(OwnerCourseMixin, ListView):
 
 class CourseCreateView(OwnerCourseEditMixin, CreateView):
     permission_required = 'courses.add_course'
+    prepopulated_fields = {'slug': ('title',)}
 
 
 class CourseUpdateView(OwnerCourseEditMixin, UpdateView):
@@ -192,6 +193,7 @@ class CourseListView(TemplateResponseMixin, View):
     template_name = 'courses/course/list.html'
 
     def get(self, request, subject=None):
+        print(self.request.user.get_all_permissions())
         subjects = cache.get('all_subjects')
         if not subjects:
             subjects = Subject.objects.annotate(
@@ -220,6 +222,7 @@ class CourseListView(TemplateResponseMixin, View):
                 'courses': courses,
             }
         )
+
 
 
 class CourseDetailView(DetailView):
@@ -277,7 +280,7 @@ class ProgressDashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['completed_lessons'] = CompletedLesson.objects.filter(user=self.request.user)
+        context['completed_lessons'] = CompletedContent.objects.filter(user=self.request.user)
         return context
 
 
