@@ -5,9 +5,11 @@ from django.urls import reverse_lazy
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 config = Config(RepositoryEnv(BASE_DIR / '.env'))
+AUTH_USER_MODEL = 'accounts.User'
 
 # Core Django
 INSTALLED_APPS = [
+    'accounts.apps.AccountsConfig',
     'courses.apps.CoursesConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,6 +45,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'accounts.middleware.UserTypeRedirectMiddleware',
     'courses.middleware.RequestMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 
 
 from .fields import OrderField
+from django.conf import settings
 
 
 class Subject(models.Model):
@@ -20,8 +21,7 @@ class Subject(models.Model):
 
 
 class Course(models.Model):
-    owner = models.ForeignKey(
-        User,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
         related_name='courses_created',
         on_delete=models.CASCADE
     )
@@ -36,7 +36,7 @@ class Course(models.Model):
     published = models.BooleanField(default=False)
     published_date = models.DateTimeField(null=True, blank=True)
     students = models.ManyToManyField(
-        User,
+        settings.AUTH_USER_MODEL,
         related_name='courses_joined',
         blank=True
     )
@@ -107,7 +107,7 @@ class Content(models.Model):
 
 class ItemBase(models.Model):
     owner = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         related_name='%(class)s_related',
         on_delete=models.CASCADE
     )
@@ -145,7 +145,7 @@ class Video(ItemBase):
 
 
 class CompletedContent(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.ForeignKey('Content', on_delete=models.CASCADE)
     completed_at = models.DateTimeField(auto_now_add=True)
 

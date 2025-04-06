@@ -1,9 +1,9 @@
 from django.forms.models import inlineformset_factory
-from django.contrib.auth import get_user_model
+from django.conf import settings
 from .models import Course, Module
 
 
-User = get_user_model()
+User = settings.AUTH_USER_MODEL
 
 ModuleFormSet = inlineformset_factory(
     Course,

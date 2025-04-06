@@ -1,7 +1,7 @@
 from courses.models import Course, CompletedContent, Content, Module
+from accounts.forms import CustomUserCreationForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import (
@@ -32,7 +32,7 @@ from .models import Profile
 
 class StudentRegistrationView(CreateView):
     template_name = 'students/student/registration.html'
-    form_class = UserCreationForm
+    form_class = CustomUserCreationForm
     success_url = reverse_lazy('student_course_list')
 
     def form_valid(self, form):
@@ -43,13 +43,13 @@ class StudentRegistrationView(CreateView):
         login(self.request, user)
 
         # Send welcome email
-        send_mail(
+        """send_mail(
             'Welcome to KnowledgeCurve',
             'Thank you for registering with KnowledgeCurve!',
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
             fail_silently=True,
-        )
+        )"""
 
         return response
 

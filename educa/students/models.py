@@ -1,12 +1,15 @@
+from django.contrib.auth import get_user_model
 from django.db import models
-from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.validators import URLValidator
+from django.conf import settings
+
+
+User = get_user_model()
 
 class Profile(models.Model):
     user = models.OneToOneField(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='profile'
     )
@@ -43,21 +46,19 @@ class Profile(models.Model):
     def username(self):
         return self.user.username
 
-    # Signal to create profile when user is created
-    @receiver(post_save, sender=User)
-    def create_user_profile(sender, instance, created, **kwargs):
-        if created:
-            Profile.objects.create(user=instance)
 
-    # Signal to save profile when user is saved
-    @receiver(post_save, sender=User)
-    def save_user_profile(sender, instance, **kwargs):
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_or_save_user_profile(sender, instance, created, **kwargs):
+    if created:
+
+        Profile.objects.create(user=instance)
+    else:
+
         instance.profile.save()
 
-    @receiver(post_save, sender=User)
-    def handle_user_profile(sender, instance, **kwargs):
-        """Create or update user profile"""
-        Profile.objects.get_or_create(user=instance)
-        instance.profile.save()
 
-        User.add_to_class('get_profile', lambda u: Profile.objects.get_or_create(user=u)[0])
+def get_profile(self):
+    return Profile.objects.get_or_create(user=self)[0]
+
+
+User.add_to_class('get_profile', get_profile)
