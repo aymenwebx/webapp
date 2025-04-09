@@ -26,7 +26,7 @@ urlpatterns = [
         views.CourseDeleteView.as_view(),
         name='course_delete',
     ),
-    path('lesson/complete/<int:lesson_id>/', views.MarkLessonCompleteView.as_view(), name='mark_lesson_complete'),
+    path('lesson/complete/<int:lesson_id>/', views.ContentCompleteView.as_view(), name='mark_lesson_complete'),
     path('progress/', views.ProgressDashboardView.as_view(), name='progress_dashboard'),
 
 
@@ -35,14 +35,13 @@ urlpatterns = [
         views.CourseModuleUpdateView.as_view(),
         name='course_module_update',
     ),
-    path(
-        'module/<int:module_id>/content/<model_name>/create/',
-        views.ContentCreateUpdateView.as_view(),
-        name='module_content_create',
-    ),
+    path('module/<int:module_id>/content/create/select/', views.ContentTypeSelectView.as_view(),
+         name='module_content_select'),
+    path('module/<int:module_id>/content/create/', views.ContentCreateView.as_view(),
+         name='module_content_create'),
     path(
         'module/<int:module_id>/content/<model_name>/<id>/',
-        views.ContentCreateUpdateView.as_view(),
+        views.ContentCreateView.as_view(),
         name='module_content_update',
     ),
     path('module/<int:module_id>/complete_all/', views.ModuleCompleteAllView.as_view(), name='module_complete_all'),

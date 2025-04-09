@@ -1,7 +1,7 @@
 from .base import *
 
 DEBUG = True
-ALLOWED_HOSTS = ['localhost', '172.20.10.4', '127.0.0.1', '154.121.119.30']
+ALLOWED_HOSTS = ['localhost', '172.20.10.4','172.20.10.5', '127.0.0.1', '154.121.119.30']
 
 # PostgreSQL for production
 DATABASES = {

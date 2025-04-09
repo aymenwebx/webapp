@@ -1,10 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% load static %}
+{% load form_tags %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-7">
+      <div class="bg-white shadow-sm rounded-4 p-5 border border-1">
+        <h2 class="mb-4 text-primary fw-bold text-center">Créer un Nouveau Cours</h2>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {{ form.non_field_errors }}
 
-</body>
-</html>
+          <div class="form-floating mb-4">
+            {{ form.subject|add_class:"form-select rounded-3" }}
+            <label for="id_subject">Sujet</label>
+            {{ form.subject.errors }}
+          </div>
+
+          <div class="form-floating mb-4">
+            {{ form.title|add_class:"form-control rounded-3" }}
+            <label for="id_title">Titre du cours</label>
+            {{ form.title.errors }}
+          </div>
+
+          {{ form.slug.as_hidden }}
+            <div class="form-floating mb-4">
+            {{ form.overview|add_class:"form-control rounded-3" }}
+            <label for="id_overview">Description</label>
+            {{ form.overview.errors }}
+          </div>
+
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-populate slug from title
+  document.addEventListener('DOMContentLoaded', function () {
+    const titleInput = document.querySelector('#id_title');
+    const slugInput = document.querySelector('#id_slug');
+
+    if (titleInput && slugInput) {
+      titleInput.addEventListener('input', function () {
+        const slug = titleInput.value
+          .toLowerCase()
+          .trim()
+          .replace(/[\s\W-]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        slugInput.value = slug;
+      });
+    }
+  });
+</script>
+{% endblock %}

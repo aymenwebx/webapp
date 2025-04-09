@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Select Content Type | {{ module.title }} | KnowledgeCurve
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h2 class="h4 mb-3">Select Content Type</h2>
+  <div class="d-grid gap-2 d-md-block">
+    <a href="{% url 'module_content_create' module.id 'text' %}" class="btn btn-outline-primary me-2 mb-2">
+      <i class="bi bi-text-paragraph"></i> Text
+    </a>
+    <a href="{% url 'module_content_create' module.id 'image' %}" class="btn btn-outline-primary me-2 mb-2">
+      <i class="bi bi-image"></i> Image
+    </a>
+    <a href="{% url 'module_content_create' module.id 'video' %}" class="btn btn-outline-primary me-2 mb-2">
+      <i class="bi bi-film"></i> Video
+    </a>
+    <a href="{% url 'module_content_create' module.id 'file' %}" class="btn btn-outline-primary mb-2">
+      <i class="bi bi-file-earmark"></i> File
+    </a>
+  </div>
+</div>
+{% endblock %}

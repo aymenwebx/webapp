@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.template.loader import render_to_string
+from ckeditor.fields import RichTextField
 
 
 from .fields import OrderField
@@ -13,6 +14,7 @@ from django.conf import settings
 class Subject(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
+    prepopulated_fields = {'slug': ('title',)}
 
     class Meta:
         ordering = ['title']
@@ -43,9 +45,8 @@ class Course(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        if not self.slug:  # Auto-generate only if empty
+        if not self.slug:
             self.slug = slugify(self.title)
-            # Ensure uniqueness
             original_slug = self.slug
             counter = 1
             while Course.objects.filter(slug=self.slug).exists():
@@ -116,7 +117,7 @@ class Content(models.Model):
 
     @property
     def completed_by_user(self):
-        return self.completedcontent_set.filter(user=self._request.user).exists()
+        return self.CompletedContent_set.filter(user=self._request.user).exists()
 
 
 class ItemBase(models.Model):
@@ -143,8 +144,35 @@ class ItemBase(models.Model):
 
 
 class Text(ItemBase):
-    content = models.TextField()
+    content = RichTextField()  # HTML content
+    styles = models.JSONField(default=dict, blank=True)  # For storing CSS styles
 
+    def render(self):
+        context = {
+            'item': self,
+            'styles': self.styles or {
+                'font_family': 'Arial',
+                'font_size': '16px',
+                'color': '#000000',
+                'background_color': '#ffffff',
+                # other default styles
+            }
+        }
+        return render_to_string(
+            f'courses/content/{self._meta.model_name}.html',
+            context
+        )
+
+
+class Table(ItemBase):
+    data = models.JSONField()  # Stores table data as JSON
+    styles = models.JSONField(default=dict)  # Table styling options
+
+    def render(self):
+        return render_to_string(
+            'courses/content/table.html',
+            {'table': self}
+        )
 
 class File(ItemBase):
     file = models.FileField(upload_to='files')

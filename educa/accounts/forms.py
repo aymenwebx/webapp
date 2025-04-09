@@ -8,7 +8,7 @@ class CustomUserCreationForm(UserCreationForm):
     user_type = forms.ChoiceField(
         choices=User.USER_TYPE_CHOICES,
         widget=forms.RadioSelect,
-        required=True,
+        required=False,
         label="Account Type"
     )
 
@@ -18,4 +18,10 @@ class CustomUserCreationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['email'].required = True
+        self.fields['email'].required = False
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+        return user

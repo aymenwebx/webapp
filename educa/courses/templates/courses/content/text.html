@@ -1,1 +1,10 @@
-{{ item.content|linebreaks }}
+<!-- courses/content/text.html -->
+<div class="rich-text-content"
+     style="font-family: {{ item.styles.font_family|default:'inherit' }};
+            font-size: {{ item.styles.font_size|default:'1rem' }};
+            color: {{ item.styles.color|default:'#333' }};
+            background-color: {{ item.styles.background_color|default:'transparent' }};
+            padding: 1rem;
+            border-radius: 0.25rem;">
+    {{ item.content|safe }}
+</div>

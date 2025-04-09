@@ -1,14 +1,19 @@
 from braces.views import CsrfExemptMixin, JsonRequestResponseMixin
 from django.apps import apps
+from ckeditor.widgets import CKEditorWidget
+from django import forms
+from bs4 import BeautifulSoup
+from django.contrib import messages
 from django.contrib.auth.mixins import (
     LoginRequiredMixin,
     PermissionRequiredMixin,
 )
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.db.models import Count, Q
 from django.forms.models import modelform_factory
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic.base import TemplateResponseMixin, View, TemplateView
 from django.views.generic.detail import DetailView
@@ -17,7 +22,64 @@ from django.views.generic.list import ListView
 from students.forms import CourseEnrollForm
 
 from .forms import ModuleFormSet
-from .models import Content, Course, Module, Subject, CompletedContent
+from .models import Content, Course, Module, Subject, CompletedContent, Image, File, Video, Text
+
+
+class TextForm(forms.ModelForm):
+    content = forms.CharField(widget=CKEditorWidget(config_name='default'))
+
+    class Meta:
+        model = apps.get_model('courses', 'text')
+        fields = ['title', 'content']
+
+    def clean_content(self):
+        content = self.cleaned_data['content']
+        return clean_html(content)  # We'll define this function
+
+
+class TableForm(forms.ModelForm):
+    content = forms.CharField(widget=CKEditorWidget(config_name='table'))
+
+    class Meta:
+        model = apps.get_model('courses', 'table')
+        fields = ['title', 'content']
+
+
+class ImageForm(forms.ModelForm):
+    class Meta:
+        model = File
+        fields = ['file']
+
+
+class VideoForm(forms.ModelForm):
+    class Meta:
+        model = Video
+        fields = ['url']
+
+
+class FileForm(forms.ModelForm):
+    class Meta:
+        model = File
+        fields = ['file']
+
+
+def clean_html(content):
+    """Sanitize HTML content"""
+    allowed_tags = ['p', 'br', 'strong', 'em', 'u', 'table', 'tr', 'td', 'th', 'span']
+    allowed_attrs = {
+        'span': ['style'],
+        'table': ['border', 'cellpadding', 'cellspacing'],
+        'td': ['colspan', 'rowspan']
+    }
+
+    soup = BeautifulSoup(content, 'html.parser')
+    for tag in soup.find_all(True):
+        if tag.name not in allowed_tags:
+            tag.unwrap()
+        else:
+            tag.attrs = {k: v for k, v in tag.attrs.items()
+                         if tag.name in allowed_attrs and k in allowed_attrs[tag.name]}
+    return str(soup)
 
 
 class OwnerMixin:
@@ -37,6 +99,7 @@ class OwnerCourseMixin(
 ):
     model = Course
     fields = ['subject', 'title', 'slug', 'overview']
+    prepopulated_fields = {'slug': ('title',)}
     success_url = reverse_lazy('manage_course_list')
 
 
@@ -50,8 +113,9 @@ class ManageCourseListView(OwnerCourseMixin, ListView):
 
 
 class CourseCreateView(OwnerCourseEditMixin, CreateView):
+    template_name = 'courses/course/create_course.html'
     permission_required = 'courses.add_course'
-    prepopulated_fields = {'slug': ('title',)}
+
 
 
 class CourseUpdateView(OwnerCourseEditMixin, UpdateView):
@@ -92,60 +156,48 @@ class CourseModuleUpdateView(TemplateResponseMixin, View):
         )
 
 
-class ContentCreateUpdateView(TemplateResponseMixin, View):
-    module = None
-    model = None
-    obj = None
-    template_name = 'courses/manage/content/form.html'
+class ContentCreateView(View):
+    def get(self, request, module_id):
+        module = get_object_or_404(Module, id=module_id)
+        return render(request, 'courses/manage/content/form.html', {'module': module})
 
-    def get_model(self, model_name):
-        if model_name in ['text', 'video', 'image', 'file']:
-            return apps.get_model(
-                app_label='courses', model_name=model_name
-            )
-        return None
+    def post(self, request, module_id):
+        module = get_object_or_404(Module, id=module_id, course__owner=request.user)
+        content_types = request.POST.getlist('content_type[]')
+        print("Received content types:", content_types)
 
-    def get_form(self, model, *args, **kwargs):
-        Form = modelform_factory(
-            model, exclude=['owner', 'order', 'created', 'updated']
-        )
-        return Form(*args, **kwargs)
+        for index, content_type in enumerate(content_types):
+            if content_type == 'text':
+                title = request.POST.getlist('text_title[]')[index]
+                content = request.POST.getlist('text_content[]')[index]
+                item = Text.objects.create(owner=request.user, title=title, content=content)
 
-    def dispatch(self, request, module_id, model_name, id=None):
-        self.module = get_object_or_404(
-            Module, id=module_id, course__owner=request.user
-        )
-        self.model = self.get_model(model_name)
-        if id:
-            self.obj = get_object_or_404(
-                self.model, id=id, owner=request.user
-            )
-        return super().dispatch(request, module_id, model_name, id)
+            elif content_type == 'image':
+                title = request.POST.getlist('image_title[]')[index]
+                file = request.FILES.getlist('image_file[]')[index]
+                item = Image.objects.create(owner=request.user, title=title, file=file)
 
-    def get(self, request, module_id, model_name, id=None):
-        form = self.get_form(self.model, instance=self.obj)
-        return self.render_to_response(
-            {'form': form, 'object': self.obj}
-        )
+            elif content_type == 'video':
+                title = request.POST.getlist('video_title[]')[index]
+                url = request.POST.getlist('video_url[]')[index]
+                item = Video.objects.create(owner=request.user, title=title, url=url)
 
-    def post(self, request, module_id, model_name, id=None):
-        form = self.get_form(
-            self.model,
-            instance=self.obj,
-            data=request.POST,
-            files=request.FILES,
-        )
-        if form.is_valid():
-            obj = form.save(commit=False)
-            obj.owner = request.user
-            obj.save()
-            if not id:
-                # new content
-                Content.objects.create(module=self.module, item=obj)
-            return redirect('module_content_list', self.module.id)
-        return self.render_to_response(
-            {'form': form, 'object': self.obj}
-        )
+            elif content_type == 'file':
+                title = request.POST.getlist('file_title[]')[index]
+                file = request.FILES.getlist('file_file[]')[index]
+                item = File.objects.create(owner=request.user, title=title, file=file)
+
+            elif content_type == 'table':
+                # If you have a Table model and JS table editor submitting serialized data
+                pass  # We'll fill this part if you're ready
+
+            else:
+                continue  # Skip if content_type is invalid
+
+            # Link the new item to the module through Content
+            Content.objects.create(module=module, item=item)
+
+        return redirect('module_content_list', module.id)
 
 
 class ContentDeleteView(View):
@@ -224,7 +276,6 @@ class CourseListView(TemplateResponseMixin, View):
         )
 
 
-
 class CourseDetailView(DetailView):
     model = Course
     template_name = 'courses/course/detail.html'
@@ -235,6 +286,7 @@ class CourseDetailView(DetailView):
         context['enroll_form'] = CourseEnrollForm(
             initial={'course': self.object}
         )
+
         if self.request.user.is_authenticated:
             completed = CompletedContent.objects.filter(
                 user=self.request.user,
@@ -244,6 +296,13 @@ class CourseDetailView(DetailView):
             context['is_enrolled'] = self.object.students.filter(
                 id=self.request.user.id
             ).exists()
+
+            # Add preview content for enrolled students
+            if context['is_enrolled']:
+                preview_module = self.object.modules.first()
+                if preview_module:
+                    context['preview_contents'] = preview_module.contents.all()[:2]
+
         return context
 
 class CourseSearchView(ListView):
@@ -264,15 +323,27 @@ class CourseSearchView(ListView):
         return Course.objects.filter(published=True)
 
 
-class MarkLessonCompleteView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        content_id = kwargs.get('lesson_id')
-        content = Content.objects.get(id=content_id)
-        # Ensure user is enrolled in the course
-        if request.user in content.module.course.students.all():
-            CompletedLesson.objects.get_or_create(user=request.user, content=content)
-            return JsonResponse({'status': 'success'})
-        return JsonResponse({'status': 'error'}, status=403)
+class ContentCompletionView(LoginRequiredMixin, View):
+    def post(self, request, content_id):
+        content = get_object_or_404(Content, id=content_id)
+
+        # Verify user is enrolled in the course
+        if request.user not in content.module.course.students.all():
+            return JsonResponse({'status': 'error'}, status=403)
+
+        completed, created = CompletedContent.objects.get_or_create(
+            user=request.user,
+            content=content
+        )
+
+        return JsonResponse({
+            'status': 'success',
+            'action': 'added' if created else 'exists',
+            'completed_count': content.module.contents.count(),
+            'user_completed': content.module.contents.filter(
+                completedcontent__user=request.user
+            ).count()
+        })
 
 
 class ProgressDashboardView(LoginRequiredMixin, TemplateView):
@@ -339,3 +410,14 @@ class ModuleCompleteAllView(LoginRequiredMixin, View):
             'status': 'success',
             'action': action
         })
+
+
+class ContentTypeSelectView(TemplateView):
+    template_name = 'courses/manage/content/content_type_select.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        module_id = self.kwargs.get('module_id')
+        module = get_object_or_404(Module, id=module_id, course__owner=self.request.user)
+        context['module'] = module
+        return context

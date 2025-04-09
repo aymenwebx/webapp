@@ -1,4 +1,7 @@
 {% load static %}
+{% block extrahead %}
+{% if form and form.media %}{{ form.media }}{% endif %}
+{% endblock %}
 <!DOCTYPE html>
 <html lang="en">
   <head>

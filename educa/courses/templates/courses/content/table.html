@@ -1,0 +1,47 @@
+<!-- courses/content/table.html -->
+<div class="table-container mb-4" style="{{ item.styles.container_style|default:'' }}">
+    <style>
+        .dynamic-table-{{ item.id }} {
+            width: {{ item.styles.width|default:'100%' }};
+            margin: {{ item.styles.margin|default:'1rem 0' }};
+            border-collapse: {{ item.styles.collapse|default:'collapse' }};
+            background-color: {{ item.styles.bg_color|default:'transparent' }};
+        }
+        .dynamic-table-{{ item.id }} th,
+        .dynamic-table-{{ item.id }} td {
+            padding: {{ item.styles.cell_padding|default:'0.75rem' }};
+            border: {{ item.styles.border|default:'1px solid #dee2e6' }};
+            text-align: {{ item.styles.text_align|default:'left' }};
+        }
+        .dynamic-table-{{ item.id }} th {
+            background-color: {{ item.styles.header_color|default:'#f8f9fa' }};
+            font-weight: {{ item.styles.header_weight|default:'bold' }};
+        }
+        .dynamic-table-{{ item.id }} tr:nth-child(even) {
+            background-color: {{ item.styles.alternate_color|default:'#f9f9f9' }};
+        }
+    </style>
+
+    {% if item.data %}
+    <table class="dynamic-table-{{ item.id }}">
+        <thead>
+            <tr>
+                {% for header in item.data.headers %}
+                <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in item.data.rows %}
+            <tr>
+                {% for cell in row %}
+                <td>{{ cell }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-warning">No table data available</div>
+    {% endif %}
+</div>

@@ -9,11 +9,6 @@ from .views import (
 )
 
 urlpatterns = [
-    path(
-        'register/',
-        views.StudentRegistrationView.as_view(),
-        name='student_registration',
-    ),
     path('password_reset/', auth_views.PasswordResetView.as_view(
         template_name='registration/password_reset.html',
         email_template_name='registration/password_reset_email.html',

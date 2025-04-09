@@ -1,7 +1,6 @@
 from courses.models import Course, CompletedContent, Content, Module
 from accounts.forms import CustomUserCreationForm
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import (
@@ -26,32 +25,7 @@ from django.views.generic.list import ListView
 from django.views.generic import TemplateView, UpdateView
 
 from .forms import CourseEnrollForm, ProfileForm, ProfilePhotoForm
-from .models import Profile
-
-
-
-class StudentRegistrationView(CreateView):
-    template_name = 'students/student/registration.html'
-    form_class = CustomUserCreationForm
-    success_url = reverse_lazy('student_course_list')
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        username = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password1')
-        user = authenticate(username=username, password=password)
-        login(self.request, user)
-
-        # Send welcome email
-        """send_mail(
-            'Welcome to KnowledgeCurve',
-            'Thank you for registering with KnowledgeCurve!',
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=True,
-        )"""
-
-        return response
+from accounts.models import Profile
 
 
 class StudentEnrollCourseView(LoginRequiredMixin, FormView):

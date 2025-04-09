@@ -1,5 +1,5 @@
 from django import forms
-from .models import Profile
+from accounts.models import Profile
 from django.contrib.auth import get_user_model
 from courses.models import Course
 
