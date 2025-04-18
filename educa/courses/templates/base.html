@@ -90,6 +90,11 @@
       </form>
       <ul class="navbar-nav ms-auto">
         {% if request.user.is_authenticated %}
+          {% if request.user.user_type == 'teacher' %}
+            <li class="nav-item me-2">
+              <a class="btn btn-outline-primary fw-bold" href="{% url 'manage_course_list' %}">My Courses</a>
+            </li>
+          {% endif %}
           <li class="nav-item me-2">
             <a class="btn btn-outline-primary fw-bold" href="{% url 'course_list' %}">Courses</a>
           </li>

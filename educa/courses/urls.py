@@ -4,7 +4,7 @@ from . import views
 
 
 urlpatterns = [
-    path('', views.CourseListView.as_view(), name='course_list'),
+
 
     path(
         'mine/',
@@ -37,11 +37,12 @@ urlpatterns = [
     ),
     path('module/<int:module_id>/content/create/select/', views.ContentTypeSelectView.as_view(),
          name='module_content_select'),
+
     path('module/<int:module_id>/content/create/', views.ContentCreateView.as_view(),
          name='module_content_create'),
     path(
-        'module/<int:module_id>/content/<model_name>/<id>/',
-        views.ContentCreateView.as_view(),
+        'module/<int:module_id>/content/<str:model_name>/<id>/',
+        views.ContentUpdateView.as_view(),
         name='module_content_update',
     ),
     path('module/<int:module_id>/complete_all/', views.ModuleCompleteAllView.as_view(), name='module_complete_all'),

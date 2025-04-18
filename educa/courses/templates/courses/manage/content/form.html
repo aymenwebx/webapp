@@ -25,29 +25,34 @@
         <button type="submit" class="btn btn-primary">Save All</button>
       </div>
     </form>
+
     <template id="content-block-template">
-  <div class="content-block card mb-3 p-3">
-    <button type="button" class="btn-close float-end remove-block" aria-label="Close"></button>
+      <div class="content-block card mb-3 p-3">
+        <button type="button" class="btn-close float-end remove-block" aria-label="Close"></button>
 
-    <div class="mb-3">
-      <label class="form-label">Content Type</label>
-      <select class="form-select content-type-select" name="content_type[]">
-        <option value="">Select content type</option>
-        <option value="text">Text</option>
-        <option value="table">Table</option>
-        <option value="image">Image</option>
-        <option value="video">Video</option>
-        <option value="file">File</option>
-      </select>
-    </div>
+        <div class="mb-3">
+          <label class="form-label">Content Type</label>
+          <select class="form-select content-type-select" name="content_type[]">
+            <option value="">Select content type</option>
+            <option value="text">Text</option>
+            <option value="table">Table</option>
+            <option value="image">Image</option>
+            <option value="video">Video</option>
+            <option value="file">File</option>
+          </select>
+        </div>
 
-    <div class="content-type-fields">
-      <!-- Will be filled dynamically -->
-    </div>
-  </div>
-</template>
+        <div class="content-type-fields">
+          <!-- Will be filled dynamically -->
+        </div>
+
+        <!-- Save button for each content block -->
+        <button type="button" class="btn btn-success save-content-block">Save Block</button>
+      </div>
+    </template>
 
 </div>
+
 <script>
 const contentForms = {
   text: `
@@ -125,41 +130,18 @@ document.addEventListener('DOMContentLoaded', function () {
     if (e.target.classList.contains('remove-block')) {
       e.target.closest('.content-block').remove();
     }
+
+    // Save block action (if you want to handle each block independently)
+    if (e.target.classList.contains('save-content-block')) {
+      const block = e.target.closest('.content-block');
+      const contentType = block.querySelector('.content-type-select').value;
+      const fieldsDiv = block.querySelector('.content-type-fields');
+
+      // Handle the save action for each block (customize as needed)
+      console.log("Saving content block of type:", contentType);
+    }
   });
 });
 </script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const contentType = document.getElementById('id_content_type');
-    const formSections = document.querySelectorAll('.content-form-section');
-
-    // Update form visibility based on the selected content type
-    function updateFormVisibility() {
-        formSections.forEach(section => section.style.display = 'none');
-        const selectedValue = contentType.value;
-        const activeSection = document.getElementById(selectedValue + '-form');
-        if (activeSection) {
-            activeSection.style.display = 'block';
-        }
-    }
-
-    // Event listener for content type selection
-    contentType.addEventListener('change', updateFormVisibility);
-
-    // Set default content type to 'text' if nothing is selected
-    if (!contentType.value) {
-        contentType.value = 'text';
-        updateFormVisibility();
-    } else {
-        updateFormVisibility();
-    }
-
-    // Initialize the table editor if it's visible
-    const tableForm = document.getElementById('table-form');
-    if (tableForm) {
-        initTableEditor('table-editor', 'table-data');
-    }
-});
-</script>
 {% endblock %}

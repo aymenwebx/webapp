@@ -159,45 +159,112 @@ class CourseModuleUpdateView(TemplateResponseMixin, View):
 class ContentCreateView(View):
     def get(self, request, module_id):
         module = get_object_or_404(Module, id=module_id)
-        return render(request, 'courses/manage/content/form.html', {'module': module})
+        return render(request, 'courses/manage/content/form.html', {
+            'module': module
+        })
 
     def post(self, request, module_id):
         module = get_object_or_404(Module, id=module_id, course__owner=request.user)
         content_types = request.POST.getlist('content_type[]')
         print("Received content types:", content_types)
 
+        # Check for missing content fields
+        text_titles = request.POST.getlist('text_title[]')
+        text_contents = request.POST.getlist('text_content[]')
+        image_titles = request.POST.getlist('image_title[]')
+        image_files = request.FILES.getlist('image_file[]')
+        video_titles = request.POST.getlist('video_title[]')
+        video_urls = request.POST.getlist('video_url[]')
+        file_titles = request.POST.getlist('file_title[]')
+        file_files = request.FILES.getlist('file_file[]')
+
         for index, content_type in enumerate(content_types):
-            if content_type == 'text':
-                title = request.POST.getlist('text_title[]')[index]
-                content = request.POST.getlist('text_content[]')[index]
-                item = Text.objects.create(owner=request.user, title=title, content=content)
+            try:
+                if content_type == 'text':
+                    title = text_titles[index]
+                    content = text_contents[index]
+                    item = Text.objects.create(owner=request.user, title=title, content=content)
 
-            elif content_type == 'image':
-                title = request.POST.getlist('image_title[]')[index]
-                file = request.FILES.getlist('image_file[]')[index]
-                item = Image.objects.create(owner=request.user, title=title, file=file)
+                elif content_type == 'image':
+                    title = image_titles[index]
+                    file = image_files[index]
+                    item = Image.objects.create(owner=request.user, title=title, file=file)
 
-            elif content_type == 'video':
-                title = request.POST.getlist('video_title[]')[index]
-                url = request.POST.getlist('video_url[]')[index]
-                item = Video.objects.create(owner=request.user, title=title, url=url)
+                elif content_type == 'video':
+                    title = video_titles[index]
+                    url = video_urls[index]
+                    item = Video.objects.create(owner=request.user, title=title, url=url)
 
-            elif content_type == 'file':
-                title = request.POST.getlist('file_title[]')[index]
-                file = request.FILES.getlist('file_file[]')[index]
-                item = File.objects.create(owner=request.user, title=title, file=file)
+                elif content_type == 'file':
+                    title = file_titles[index]
+                    file = file_files[index]
+                    item = File.objects.create(owner=request.user, title=title, file=file)
 
-            elif content_type == 'table':
-                # If you have a Table model and JS table editor submitting serialized data
-                pass  # We'll fill this part if you're ready
+                elif content_type == 'table':
+                    # If you're submitting serialized table data, you'll handle it here
+                    pass  # Handle table logic if needed
 
-            else:
-                continue  # Skip if content_type is invalid
+                else:
+                    continue  # Skip if content_type is invalid
 
-            # Link the new item to the module through Content
-            Content.objects.create(module=module, item=item)
+                # Link the new item to the module through Content
+                Content.objects.create(module=module, item=item)
+
+            except IndexError:
+                # If there is a missing index in any list, skip this iteration (log or notify the user if needed)
+                continue
 
         return redirect('module_content_list', module.id)
+
+
+class ContentUpdateView(View):
+    model_map = {
+        'text': Text,
+        'image': Image,
+        'video': Video,
+        'file': File,
+    }
+
+    def get(self, request, module_id, model_name, id):
+        module = get_object_or_404(Module, id=module_id)
+        model = self.model_map.get(model_name)
+        if not model:
+            return redirect('module_content_list', module_id)
+
+        item = get_object_or_404(model, id=id, owner=request.user)
+        return render(request, 'courses/manage/content/form.html', {
+            'module': module,
+            'object': item,
+            'update': True,  # Flag for template logic (e.g. button text)
+            'model_name': model_name
+        })
+
+    def post(self, request, module_id, model_name, id):
+        module = get_object_or_404(Module, id=module_id, course__owner=request.user)
+        model = self.model_map.get(model_name)
+        if not model:
+            return redirect('module_content_list', module_id)
+
+        item = get_object_or_404(model, id=id, owner=request.user)
+
+        if model_name == 'text':
+            item.title = request.POST.get('text_title', item.title)
+            item.content = request.POST.get('text_content', item.content)
+        elif model_name == 'image':
+            item.title = request.POST.get('image_title', item.title)
+            if 'image_file' in request.FILES:
+                item.file = request.FILES['image_file']
+        elif model_name == 'video':
+            item.title = request.POST.get('video_title', item.title)
+            item.url = request.POST.get('video_url', item.url)
+        elif model_name == 'file':
+            item.title = request.POST.get('file_title', item.title)
+            if 'file_file' in request.FILES:
+                item.file = request.FILES['file_file']
+
+        item.save()
+
+        return redirect('module_content_list', module_id)
 
 
 class ContentDeleteView(View):

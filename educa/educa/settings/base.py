@@ -59,7 +59,6 @@ ROOT_URLCONF = 'educa.urls'
 WSGI_APPLICATION = 'educa.wsgi.application'
 
 # Auth
-LOGIN_REDIRECT_URL = reverse_lazy('student_course_list')
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},

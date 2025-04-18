@@ -14,7 +14,7 @@ class UserTypeRedirectMiddleware:
                 request.path == reverse('course_list')):
 
             if request.user.user_type == 'student':
-                return redirect('student_course_list')
+                return redirect('course_list')
             """elif request.user.user_type == 'teacher':
                 return redirect('teacher_dashboard')
             elif request.user.user_type == 'parent':

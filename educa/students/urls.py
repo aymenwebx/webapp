@@ -7,6 +7,7 @@ from .views import (
     ProfileUpdateView,
     ProfilePhotoUpdateView,
 )
+from courses.views import CourseListView
 
 urlpatterns = [
     path('password_reset/', auth_views.PasswordResetView.as_view(
@@ -40,16 +41,6 @@ urlpatterns = [
     path('progress/', views.ProgressDashboardView.as_view(), name='progress_dashboard'),
     path(
         'profile/photo/', ProfilePhotoUpdateView.as_view(), name='profile_photo_upload'),
-    path(
-        'course/<pk>/',
-        views.StudentCourseDetailView.as_view(),
-        name='student_course_detail'
-    ),
-    path(
-        'course/<pk>/<module_id>/',
-        views.StudentCourseDetailView.as_view(),
-        name='student_course_detail_module'
-    ),
     path(
         'course/<pk>/',
         cache_page(60 * 15)(views.StudentCourseDetailView.as_view()),

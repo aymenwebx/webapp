@@ -12,7 +12,7 @@ from django.contrib.auth.views import (
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.core.mail import send_mail
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
@@ -42,16 +42,13 @@ class StudentEnrollCourseView(LoginRequiredMixin, FormView):
             'student_course_detail', args=[self.course.id]
         )
 
-    def render_to_response(self, context, **response_kwargs):
-        return redirect(self.get_success_url())
 
 class StudentCourseListView(LoginRequiredMixin, ListView):
     model = Course
-    template_name = 'students/course/list.html'
+    template_name = 'courses/course/list.html'
 
     def get_queryset(self):
-        qs = super().get_queryset()
-        return qs.filter(students__in=[self.request.user])
+        return Course.objects.all()
 
 
 class StudentCourseDetailView(LoginRequiredMixin, DetailView):
@@ -64,7 +61,6 @@ class StudentCourseDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # get course object
         course = self.get_object()
         completed_contents = set(
             CompletedContent.objects.filter(
@@ -83,6 +79,13 @@ class StudentCourseDetailView(LoginRequiredMixin, DetailView):
             # get first module
             context['module'] = course.modules.all()[0]
         return context
+
+    def get_object(self, queryset=None):
+        try:
+            return super().get_object(queryset)
+        except Http404:
+            # Custom message or redirect
+            raise Http404("You are not enrolled in this course or it does not exist.")
 
 
 class ProfileView(LoginRequiredMixin, TemplateView):

@@ -15,7 +15,7 @@ User = get_user_model()
 class UserRegistrationView(CreateView):
     template_name = 'registration.html'
     form_class = CustomUserCreationForm
-    success_url = reverse_lazy('student_course_list')
+    success_url = reverse_lazy('home')
 
     def form_valid(self, form):
         self.object = form.save()
@@ -24,11 +24,14 @@ class UserRegistrationView(CreateView):
 
 class CustomLoginView(LoginView):
     def form_valid(self, form):
+        next_page = self.request.GET.get('home', None)  # Get the next page to redirect to
         response = super().form_valid(form)
 
-        if self.request.user.user_type == 'teacher':
+        if next_page:
+            return redirect(next_page)
+        elif self.request.user.user_type == 'teacher':
             return redirect('manage_course_list')
         elif self.request.user.user_type == 'student':
-            return redirect('student_course_list')
+            return redirect('course_list')
         else:
-            return response
+            return redirect('home')
